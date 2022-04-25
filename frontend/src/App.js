@@ -2,7 +2,7 @@ import Big from 'big.js'
 import { providers, utils } from 'near-api-js'
 import PropTypes from 'prop-types'
 import React, { useCallback, useEffect, useState } from 'react'
-import 'regenerator-runtime/runtime'
+import 'regenerator-runtime'
 import Form from './components/Form'
 import Messages from './components/Messages'
 import SignIn from './components/SignIn'
@@ -89,7 +89,7 @@ const App = () => {
               type: 'FunctionCall',
               params: {
                 methodName: 'set_greeting',
-                args: { text: message.value },
+                args: { message: message.value },
                 gas: BOATLOAD_OF_GAS,
                 deposit: utils.format.parseNearAmount(donation.value || '0'),
               },

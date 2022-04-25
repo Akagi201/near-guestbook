@@ -13,8 +13,10 @@
 
 // To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::collections::LookupMap;
 use near_sdk::{env, log, near_bindgen, BorshStorageKey, AccountId};
+use near_sdk::json_types::U64;
 
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
@@ -26,7 +28,14 @@ enum StorageKey {
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
-    records: LookupMap<AccountId, (String, u64)>,
+    records: LookupMap<AccountId, Metadata>,
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Metadata {
+    pub message: String,
+    pub timestamp: U64,
 }
 
 impl Default for Contract {
@@ -39,19 +48,23 @@ impl Default for Contract {
 
 #[near_bindgen]
 impl Contract {
+    #[payable]
     pub fn set_greeting(&mut self, message: String) {
         let account_id = env::signer_account_id();
         let timestamp = env::block_timestamp();
 
         log!("{} set_greeting with message {} {}", account_id, message, timestamp);
 
-        self.records.insert(&account_id, &(message, timestamp));
+        self.records.insert(&account_id, &Metadata{
+            message, 
+            timestamp:timestamp.into(),
+        });
     }
 
     // `match` is similar to `switch` in other languages; here we use it to default to "Hello" if
     // self.records.get(&account_id) is not yet defined.
     // Learn more: https://doc.rust-lang.org/book/ch06-02-match.html#matching-with-optiont
-    pub fn get_greeting(&self, account_id: AccountId) -> Option::<(String, u64)> {
+    pub fn get_greeting(&self, account_id: AccountId) -> Option::<Metadata> {
         log!("get_greeting for account_id {}", account_id);
         self.records.get(&account_id)
     }
@@ -91,7 +104,7 @@ mod tests {
         assert_eq!(get_logs(), vec!["bob_near set_greeting with message hello 0"]);
         let context = get_context(true);
         testing_env!(context);
-        assert_eq!("hello".to_string(), contract.get_greeting("bob_near".parse().unwrap()).unwrap().0);
+        assert_eq!(super::Metadata{message: "hello".into(), timestamp: 0u64.into()} ,contract.get_greeting("bob_near".parse().unwrap()).unwrap());
         assert_eq!(get_logs(), vec!["get_greeting for account_id bob_near"]);
     }
 
