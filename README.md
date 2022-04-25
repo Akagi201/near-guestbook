@@ -11,7 +11,6 @@ make contract
 ```sh
 near create-account nearguestbook.akagi201.testnet --masterAccount akagi201.testnet
 make deploy-contract
-near call nearguestbook.akagi201.testnet new_default_meta '{"owner_id": "nearguestbook.akagi201.testnet"}' --accountId nearguestbook.akagi201.testnet
 ```
 
 ## Build frontend

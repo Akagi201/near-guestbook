@@ -34,7 +34,7 @@ export const WalletSelectorContextProvider = ({ children }) => {
   useEffect(() => {
     NearWalletSelector.init({
       network: 'testnet',
-      contractId: 'guest-book.leelorz.testnet',
+      contractId: 'guestbook.akagi201.testnet',
       wallets: [setupNearWallet(), setupSender()],
     })
       .then((instance) => {
